@@ -18,15 +18,27 @@
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
     <encoding>UTF-8</encoding>
-    <scala.version>2.11.5</scala.version>
+    <scala.version>2.11.12</scala.version>
     <scala.compat.version>2.11</scala.compat.version>
+    <scala.compatsql.version>2.12</scala.compatsql.version>
   </properties>
-
   <dependencies>
     <dependency>
       <groupId>org.scala-lang</groupId>
       <artifactId>scala-library</artifactId>
       <version>${scala.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-core_2.11</artifactId>
+      <version>2.4.4</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-sql_2.11</artifactId>
+      <version>2.4.4</version>
+      <scope>provided</scope>
     </dependency>
 
     <!-- Test -->
@@ -47,6 +59,16 @@
       <artifactId>scalatest_${scala.compat.version}</artifactId>
       <version>2.2.4</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.typesafe</groupId>
+      <artifactId>config</artifactId>
+      <version>1.2.1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.typesafe.scala-logging</groupId>
+      <artifactId>scala-logging-slf4j_2.11</artifactId>
+      <version>2.1.2</version>
     </dependency>
   </dependencies>
 
