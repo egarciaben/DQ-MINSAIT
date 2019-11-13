@@ -2,9 +2,8 @@ package com.santander.kpi.project.Process
 
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import com.typesafe.scalalogging.slf4j.LazyLogging
-import org.apache.spark.sql.functions.col
 
-class DataFrameBuilder (val spark: SparkSession) extends LazyLogging{
+class DataFrameBuilder (spark: SparkSession) extends LazyLogging{
 
   def csvToDF(path:String):DataFrame ={
     val df=spark.read.format("csv").

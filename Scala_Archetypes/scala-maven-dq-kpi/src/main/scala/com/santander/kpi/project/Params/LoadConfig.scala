@@ -8,7 +8,7 @@ class LoadConfig (confOrigen: Config) {
 
   def load(): Int ={
     t_file_read = ConfigFactory.load(config).getString("ParquetReader.Input.t_file_read")
-    println(s"0--->$t_file_read")
+    println(s"despliegue de nombre:--->$t_file_read")
     0
   }
 }

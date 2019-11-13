@@ -1,0 +1,13 @@
+----------------------------------------------------------------
+Sat Nov 02 22:24:23 CST 2019:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.10.1.1 - (1458268): instance a816c00e-016e-2f81-c242-00002de54460 
+on database directory /home/indra/Documents/KPIsGitHub/Scala_Archetypes/scala-maven-dq-kpi/metastore_db with class loader org.apache.spark.sql.hive.client.IsolatedClientLoader$$anon$1@753c7411 
+Loaded from file:/usr/local/spark/lib/spark-assembly-1.6.1-hadoop2.6.0.jar
+java.vendor=Oracle Corporation
+java.runtime.version=1.8.0_212-8u212-b03-0ubuntu1.18.10.1-b03
+user.dir=/home/indra/Documents/KPIsGitHub/Scala_Archetypes/scala-maven-dq-kpi
+os.name=Linux
+os.arch=amd64
+os.version=4.18.0-25-generic
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''
