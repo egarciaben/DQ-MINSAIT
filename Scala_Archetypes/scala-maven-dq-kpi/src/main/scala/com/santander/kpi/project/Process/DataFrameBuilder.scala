@@ -76,4 +76,12 @@ class DataFrameBuilder (spark: SparkSession) extends (LazyLogging){
     df
   }
 
+  /*integracion de clientes Vigentes: funcion que realiza la union de dataframes conjuntando el universo de clientes vigentes*/
+
+  def ctesVigentes(dfBEI : DataFrame, dfPYME : DataFrame, dfPART : DataFrame, dfBMG : DataFrame) : DataFrame={
+    val UnivVig = dfBEI.union(dfPYME.union(dfPART.union(dfBMG)))
+
+    UnivVig
+  }
+
 }
