@@ -16,6 +16,5 @@ object KPIEngineTrail extends InitSpark{
     val dfIntegrator = new Integrator(spark,loadC)
     dfIntegrator.run()
 
-
   }
 }
