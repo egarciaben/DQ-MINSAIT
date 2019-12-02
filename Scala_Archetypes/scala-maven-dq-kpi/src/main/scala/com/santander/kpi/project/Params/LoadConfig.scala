@@ -10,6 +10,8 @@ class LoadConfig (confOrigen: Config) {
   var t_det_client_bei : String = ""
   var t_det_client_pyme : String = ""
   var t_det_client_part : String = ""
+  var t_pedt001 : String = ""
+  var t_pedt023 : String = ""
 
   def load(): Int ={
     t_file_read = ConfigFactory.load(config).getString("ParquetReader.Input.t_file_read")
@@ -29,6 +31,14 @@ class LoadConfig (confOrigen: Config) {
 
     t_det_client_part = ConfigFactory.load(config).getString("ParquetReader.Input.t_detalle_ctes_particulares")
     println(s"ruta clientes particulares:--->$t_det_client_part")
+
+    t_pedt001 = ConfigFactory.load(config).getString("ParquetReader.Input.t_pdt001")
+    println(s"ruta clientes particulares:--->$t_pedt001")
+
+    t_pedt023 = ConfigFactory.load(config).getString("ParquetReader.Input.t_pdt023")
+    println(s"ruta clientes particulares:--->$t_pedt023")
+
+
     0
   }
 }
