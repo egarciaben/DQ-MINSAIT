@@ -12,6 +12,10 @@ class LoadConfig (confOrigen: Config) {
   var t_det_client_part : String = ""
   var t_pedt001 : String = ""
   var t_pedt023 : String = ""
+  var t_telefonos : String = ""
+  var t_clientes_activos : String = ""
+  var t_file_parquet : String = ""
+  var local : Boolean = true
 
   def load(): Int ={
     t_file_read = ConfigFactory.load(config).getString("ParquetReader.Input.t_file_read")
@@ -37,6 +41,20 @@ class LoadConfig (confOrigen: Config) {
 
     t_pedt023 = ConfigFactory.load(config).getString("ParquetReader.Input.t_pdt023")
     println(s"ruta clientes particulares:--->$t_pedt023")
+
+    t_file_parquet = ConfigFactory.load(config).getString("ParquetReader.Output.t_file_parquet")
+    println(s"ruta de salida de archivos: ---> $t_file_parquet")
+
+    if(local){
+
+      t_telefonos = ConfigFactory.load(config).getString("ParquetReader.Input.t_telefonos")
+      println(s"ruta telefonos:--->$t_telefonos")
+
+      t_clientes_activos = ConfigFactory.load(config).getString("ParquetReader.Input.t_clientes_activos")
+      println(s"ruta clientes activos:--->$t_clientes_activos")
+    }
+
+
 
 
     0

@@ -1,11 +1,11 @@
 package com.santander.kpi.project.Process
 
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import org.apache.spark.sql.functions._
 import com.crealytics.spark.excel._
 import com.santander.kpi.project.InitSpark
-import org.apache.spark.sql.types.IntegerType
+import org.apache.spark.sql.types.{DataType, IntegerType, LongType, StringType, StructField, StructType}
 
 class DataFrameBuilder (spark: SparkSession) extends (LazyLogging){
 
@@ -183,14 +183,119 @@ def univVigActiv (df : DataFrame, df2 : DataFrame): DataFrame={
   }
 
   def KPI00502Activ(df : DataFrame)={
+    val kpi00502 = df.where(col("ID_ACTIVO")==="1").count()
+    kpi00502
+  }
+
+  def KPI00502ActNoTel(df : DataFrame) : DataFrame={
+    val kpi00502 = df.where(col("TEL").isNull
+    && col("ID_ACTIVO")==="1"
+    )
+    kpi00502
+  }
+
+  def KPI00502Vig(df : DataFrame)={
     val kpi00502 = df.count()
     kpi00502
   }
 
-  def KPI00502ActNoTel(df : DataFrame)={
+  def KPI00502VigNoTel(df : DataFrame)={
     val kpi00502 = df.where(col("TEL").isNull).count()
     kpi00502
   }
+
+  /*2.-# de clientes con el dato "teléfono" con formato incorrecto/ total de clientes activos*/
+  /*K.BMX.PE.00005.O.003*/
+
+  def KPI00503FormatIncorrectNum(df : DataFrame): Long={
+    val kpi00503 = df.where(col("TEL").isNotNull
+      && length(col("TEL") ).notEqual(10)).count()
+
+    kpi00503
+  }
+
+  def KPI00503FormatIncorrectNumACT(df : DataFrame): DataFrame={
+    val kpi00503 = df.where(col("TEL").isNotNull
+      && length(col("TEL") ).notEqual(10)
+      && col("ID_ACTIVO")==="1")
+
+    kpi00503
+  }
+
+  def KPI00503FormatIncorrectDen (df : DataFrame): Long={
+    val kpi00503 = df.select("penumper").distinct().count()
+    kpi00503
+  }
+
+  def KPI00503FormatIncorrectDenACT (df : DataFrame): Long={
+    val kpi00503 = df.where(col("ID_ACTIVO")==="1")
+      .count()
+    kpi00503
+  }
+
+  // 3.-# de clientes con el dato "teléfono" con más de 5 números consecutivos idénticos / total de clientes activos
+  //K.BMX.PE.00005.O.004
+
+  def KPI00504NumerosIdenticosNumVig(df:DataFrame): Long={
+    val pattern = "(1{5,}|2{5,}|3{5,}|4{5,}|5{5,}|6{5,}|7{5,}|8{5,}|9{5,}|0{5,})"
+    val kpi504 = df.withColumn("TEL34", regexp_extract(col("TEL"),pattern,1)
+    ).where(length(col("TEL34")) > 0
+    ).count()
+    kpi504
+  }
+
+  def KPI00504NumerosIdenticosNumAct(df:DataFrame): DataFrame={
+    val pattern = "(1{5,}|2{5,}|3{5,}|4{5,}|5{5,}|6{5,}|7{5,}|8{5,}|9{5,}|0{5,})"
+    val kpi504 = df.withColumn("TEL34", regexp_extract(col("TEL"),pattern,1)
+    ).where(length(col("TEL34")) > 0
+      && col("ID_ACTIVO") === "1"
+    )
+    kpi504
+  }
+
+  def PenumperTel(df:DataFrame): DataFrame={
+    val penumperTel = df.select(col("penumper"),col("TEL"))
+    penumperTel
+  }
+
+
+  //Creacion del DF para la creacion del archivo de reporte.
+
+  private def asRows[U](values: List[U]): List[Row] = {
+    values.map {
+      case x: Row     => x.asInstanceOf[Row]
+      case y: Product => Row(y.productIterator.toList: _*)
+      case a          => Row(a)
+    }
+  }
+
+  private def asSchema[U <: Product](fields: List[U]): List[StructField] = {
+    fields.map {
+      case x: StructField => x.asInstanceOf[StructField]
+      case (name: String, dataType: DataType, nullable: Boolean) =>
+        StructField(
+          name,
+          dataType,
+          nullable
+        )
+    }
+  }
+
+  def createReporteFinalDF[U <: Product](rowData: List[U]): DataFrame = {
+    val schema = List(
+      ("KPI_Name", StringType, false),
+      ("Numerador_Vig", LongType, false),
+      ("Denominador_Vig", LongType, false),
+      ("Numerador_Act", LongType, false),
+      ("Denominador_Act", LongType, false)
+    )
+    spark.createDataFrame(
+      spark.sparkContext.parallelize(asRows(rowData)),
+      StructType(asSchema(schema))
+    )
+
+  }
+
 
 
 
