@@ -259,6 +259,62 @@ def univVigActiv (df : DataFrame, df2 : DataFrame): DataFrame={
   }
 
 
+  //#4.- # de clientes con el dato teléfono con números secuenciales / total de clientes activos
+  //K.BMX.PE.00005.O.006
+
+  def KPI00506NumerosSecuencialesNumVig(df:DataFrame): DataFrame={
+    val pattern= "(1234567|2345678|3456789|4567890|0123456)\\d"
+    val kpi506= df.withColumn("TEL34",regexp_extract(col("TEL"),pattern,1))
+      .where(
+      length(col("TEL34")) > 0
+      )
+
+    kpi506
+  }
+
+  def KPI00506NumerosSecuencialesNumAct(df:DataFrame): DataFrame={
+    val pattern= "(1234567|2345678|3456789|4567890|0123456)\\d"
+    val kpi506= df.withColumn("TEL34",regexp_extract(col("TEL"),pattern,1))
+      .where(
+        length(col("TEL34")) > 0 &&
+        col("ID_ACTIVO") === "1"
+      )
+
+    kpi506
+  }
+
+  /****5.-# de clientes con el dato teléfono repetido / total de clientes activos***/
+  /****K.BMX.PE.00005.O.007****/
+
+  def Query507DF(df:DataFrame) : DataFrame ={
+    val query507 = df.groupBy("TEL")
+      .agg(count("TEL")).withColumnRenamed("count(TEL)","count_tel")
+
+    query507
+  }
+
+  def KPI00507TelefonoRepetidoNumVig(dfClientes: DataFrame,dfQuery507:DataFrame): DataFrame ={
+    val kpi507 = dfQuery507.where(col("count_tel") >= 2)
+    val kpi507Alias = kpi507.as("dfKpi507")
+    val clienteActDF = dfClientes.as("dfClientes")
+    val ar = clienteActDF.join(kpi507Alias,col("dfClientes.TEL") === col("dfKpi507.TEL")
+      , "inner")
+    ar
+  }
+
+  def KPI00507TelefonoRepetidoDetalle(df: DataFrame): DataFrame ={
+    val kpi507 = df.select(col("penumper"),col("dfClientes.TEL"),col("count_tel"))
+        .orderBy(col("dfClientes.TEL"))
+    kpi507
+  }
+
+  def KPIsClientesActivos(df: DataFrame): DataFrame ={
+    val kpiClientesActivos = df.where(col("ID_ACTIVO") ==="1")
+    kpiClientesActivos
+  }
+
+
+
   //Creacion del DF para la creacion del archivo de reporte.
 
   private def asRows[U](values: List[U]): List[Row] = {
@@ -281,6 +337,12 @@ def univVigActiv (df : DataFrame, df2 : DataFrame): DataFrame={
     }
   }
 
+  /**
+   *
+   * @param rowData
+   * @tparam U
+   * @return
+   */
   def createReporteFinalDF[U <: Product](rowData: List[U]): DataFrame = {
     val schema = List(
       ("KPI_Name", StringType, false),
@@ -289,14 +351,13 @@ def univVigActiv (df : DataFrame, df2 : DataFrame): DataFrame={
       ("Numerador_Act", LongType, false),
       ("Denominador_Act", LongType, false)
     )
-    spark.createDataFrame(
+   val reporte = spark.createDataFrame(
       spark.sparkContext.parallelize(asRows(rowData)),
       StructType(asSchema(schema))
     )
 
+    reporte
   }
-
-
 
 
 }

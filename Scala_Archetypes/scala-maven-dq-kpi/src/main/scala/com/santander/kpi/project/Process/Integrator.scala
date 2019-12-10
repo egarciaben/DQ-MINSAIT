@@ -253,8 +253,36 @@ class Integrator (spark: SparkSession, confParams: LoadConfig){
     println(s"Denominador de Activos : $DenAct")
 
 
+    /****4.-# de clientes con el dato teléfono con números secuenciales / total de clientes activos***/
+    /****K.BMX.PE.00005.O.006*****/
+    println("/****4.-# de clientes con el dato teléfono con números secuenciales / total de clientes activos***/\n/****K.BMX.PE.00005.O.006*****/")
+    val kpi506NumVig = dfBuilder.KPI00506NumerosSecuencialesNumVig(DFClientesActivos)
+    kpi506NumVig.show()
+    println(kpi506NumVig.count())
+
+    val kpi506NumAct = dfBuilder.KPI00506NumerosSecuencialesNumAct(DFClientesActivos)
+    println(kpi506NumAct.count())
+
+    /****5.-# de clientes con el dato teléfono repetido / total de clientes activos***/
+    /****K.BMX.PE.00005.O.007****/
+
+    val query507 = dfBuilder.Query507DF(DFClientesActivos)
+    val kpi507NumVig = dfBuilder.KPI00507TelefonoRepetidoNumVig(DFClientesActivos,query507)
+    val kpi507NumAct = dfBuilder.KPIsClientesActivos(kpi507NumVig)
+    val kpi507Detalle = dfBuilder.KPI00507TelefonoRepetidoDetalle(kpi507NumAct)
+
+
+     println("********KPI507***********")
+    kpi507NumVig.show()
+    println(kpi507NumVig.count())
+    kpi507NumAct.show()
+    println(kpi507NumAct.count())
+    kpi507Detalle.show()
+
+
 
 //Escritura de archivos CSVs para evidencia de KPIs
+
     val detalleActivKPI00502 = dfBuilder.PenumperTel(kpi1ActivNoTel)
     detalleActivKPI00502.coalesce(1).write.format("csv")
       .option("header","true")
@@ -273,13 +301,26 @@ class Integrator (spark: SparkSession, confParams: LoadConfig){
       .mode("overwrite")
       .save(confParams.t_file_parquet+"/Detalles/K_BMX_PE_00005_O_004_Activos")
 
+      val detalleActivKPI00506 = dfBuilder.PenumperTel(kpi506NumAct)
+      detalleActivKPI00506.coalesce(1).write.format("csv")
+        .option("header","true")
+        .mode("overwrite")
+        .save(confParams.t_file_parquet+"/Detalles/K_BMX_PE_00005_O_006_Activos")
+
+        kpi507Detalle.coalesce(1).write.format("csv")
+        .option("header","true")
+        .mode("overwrite")
+        .save(confParams.t_file_parquet+"/Detalles/K_BMX_PE_00005_O_007_Activos")
+
 
     //Generacion y escritura del archivo de reporte de kpis
 
     val rowData = List(
       ("K.BMX.PE.00005.O.002", kpi1VigNoTel,DenVig,kpi1ActivNoTel.count(),DenAct),
       ("K.BMX.PE.00005.O.003", kpi00503Num,DenVig,kpi00503NumAct.count(),DenAct),
-      ("K.BMX.PE.00005.O.004", kpi00504NumVig,DenVig,kpi00504NumAct.count(),DenAct)
+      ("K.BMX.PE.00005.O.004", kpi00504NumVig,DenVig,kpi00504NumAct.count(),DenAct),
+      ("K.BMX.PE.00005.O.006", kpi506NumVig.count(),DenVig,kpi506NumAct.count(),DenAct),
+      ("K.BMX.PE.00005.O.007", kpi507NumVig.count(),DenVig,kpi507NumAct.count(),DenAct)
 
     )
 
