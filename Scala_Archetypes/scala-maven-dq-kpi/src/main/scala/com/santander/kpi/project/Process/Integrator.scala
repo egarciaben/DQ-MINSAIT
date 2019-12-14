@@ -179,15 +179,13 @@ class Integrator (spark: SparkSession, confParams: LoadConfig){
 
 
 
-
-
 //val repetidos = DFClientesActivos.groupBy("penumper").agg(count("TEL").as("repetido"))
 //val rep = repetidos.select(col("penumper"),col("repetido")).where(col("repetido") > 1)
  //   rep.show()
 
 /*println(DFClientesActivos.count())*/
 
-
+/* desde aqui comienza los comentarios
     println("************* K.BMX.PE.00005.O.002 VIGENTES****************")
 
     val kpi1Vig = dfBuilder.KPI00502Vig(DFClientesActivos)
@@ -257,11 +255,11 @@ class Integrator (spark: SparkSession, confParams: LoadConfig){
     /****K.BMX.PE.00005.O.006*****/
     println("/****4.-# de clientes con el dato teléfono con números secuenciales / total de clientes activos***/\n/****K.BMX.PE.00005.O.006*****/")
     val kpi506NumVig = dfBuilder.KPI00506NumerosSecuencialesNumVig(DFClientesActivos)
-    kpi506NumVig.show()
-    println(kpi506NumVig.count())
+    //kpi506NumVig.show()
+    //println(kpi506NumVig.count())
 
     val kpi506NumAct = dfBuilder.KPI00506NumerosSecuencialesNumAct(DFClientesActivos)
-    println(kpi506NumAct.count())
+    //println(kpi506NumAct.count())
 
     /****5.-# de clientes con el dato teléfono repetido / total de clientes activos***/
     /****K.BMX.PE.00005.O.007****/
@@ -273,14 +271,46 @@ class Integrator (spark: SparkSession, confParams: LoadConfig){
 
 
      println("********KPI507***********")
-    kpi507NumVig.show()
-    println(kpi507NumVig.count())
-    kpi507NumAct.show()
-    println(kpi507NumAct.count())
-    kpi507Detalle.show()
+   // kpi507NumVig.show()
+   // println(kpi507NumVig.count())
+    //kpi507NumAct.show()
+   // println(kpi507NumAct.count())
+   // kpi507Detalle.show()
+
+
+ terminan los comentarios*/
+
+    /****6.-# de clientes con el dato "correo electrónico" nulo/ total de clientes activos***/
+    /******K.BMX.PE.00006.O.002*******/
+      val correoNulo = dfBuilder.KPI00602CorreoNuloVig(DFClientesActivos)
+    println("K.BMX.PE.00006.O.002")
+   // correoNulo.show()
+    val correoNulVig = correoNulo.count()
+   // println(correoNulVig)
+
+    val correoNuloAct = dfBuilder.KPIsClientesActivos(correoNulo)
+   // correoNuloAct.show()
+    val correoNulAct = correoNuloAct.count()
+    //println(correoNulAct)
+
+    /****7.-# de clientes con el dato "correo electrónico" con formato incorrecto/ total de clientes activos***/
+    /****K.BMX.PE.00006.O.003*****/
+
+    val kpi6003 = dfBuilder.KPI00603PruebaNum(DFClientesActivos)
+    val kpidominios = dfBuilder.KPI00603Dominios(dfBuilder.csvToDF(confParams.t_dominios))
+
+    println("kpi6003 ")
+    kpi6003.show()
+    kpidominios.show()
+    println("te amo kike ")
+    val kpi6003NumVig=dfBuilder.KPI00603CorreoFormatIncorrectVig(kpi6003,kpidominios)
+    println(kpi6003.count())
 
 
 
+    dfBuilder.KPI00605Query64(DFClientesActivos).show()
+
+/*
 //Escritura de archivos CSVs para evidencia de KPIs
 
     val detalleActivKPI00502 = dfBuilder.PenumperTel(kpi1ActivNoTel)
@@ -320,7 +350,8 @@ class Integrator (spark: SparkSession, confParams: LoadConfig){
       ("K.BMX.PE.00005.O.003", kpi00503Num,DenVig,kpi00503NumAct.count(),DenAct),
       ("K.BMX.PE.00005.O.004", kpi00504NumVig,DenVig,kpi00504NumAct.count(),DenAct),
       ("K.BMX.PE.00005.O.006", kpi506NumVig.count(),DenVig,kpi506NumAct.count(),DenAct),
-      ("K.BMX.PE.00005.O.007", kpi507NumVig.count(),DenVig,kpi507NumAct.count(),DenAct)
+      ("K.BMX.PE.00005.O.007", kpi507NumVig.count(),DenVig,kpi507NumAct.count(),DenAct),
+      ("K.BMX.PE.00006.O.002", correoNulVig,DenVig,correoNulAct,DenAct)
 
     )
 
@@ -332,7 +363,7 @@ class Integrator (spark: SparkSession, confParams: LoadConfig){
       .option("header","true")
       .mode("overwrite")
       .save(confParams.t_file_parquet+"/Detalles/ReporteFinal")
-
+*/
 
     0
   }

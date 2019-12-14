@@ -16,6 +16,8 @@ class LoadConfig (confOrigen: Config) {
   var t_clientes_activos : String = ""
   var t_file_parquet : String = ""
   var local : Boolean = true
+  var t_pedt115 : String = ""
+  var t_dominios: String = ""
 
   def load(): Int ={
     t_file_read = ConfigFactory.load(config).getString("ParquetReader.Input.t_file_read")
@@ -44,6 +46,10 @@ class LoadConfig (confOrigen: Config) {
 
     t_file_parquet = ConfigFactory.load(config).getString("ParquetReader.Output.t_file_parquet")
     println(s"ruta de salida de archivos: ---> $t_file_parquet")
+
+    t_pedt115 = ConfigFactory.load(config).getString("ParquetReader.Input.t_pedt115")
+
+    t_dominios = ConfigFactory.load(config).getString("ParquetReader.Input.t_dominios")
 
     if(local){
 

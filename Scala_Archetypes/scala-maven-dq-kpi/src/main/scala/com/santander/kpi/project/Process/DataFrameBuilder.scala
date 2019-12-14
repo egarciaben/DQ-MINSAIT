@@ -2,7 +2,7 @@ package com.santander.kpi.project.Process
 
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import com.typesafe.scalalogging.slf4j.LazyLogging
-import org.apache.spark.sql.functions._
+import org.apache.spark.sql.functions.{substring_index, _}
 import com.crealytics.spark.excel._
 import com.santander.kpi.project.InitSpark
 import org.apache.spark.sql.types.{DataType, IntegerType, LongType, StringType, StructField, StructType}
@@ -32,6 +32,15 @@ class DataFrameBuilder (spark: SparkSession) extends (LazyLogging){
     val df=spark.read.format("csv").
       option("sep","\t").
       option("header","true").
+      load(path)
+    df
+  }
+
+  /*csv-txt separado por Tabuladores sin encabezados*/
+  def txtTabularToDF(path : String):DataFrame ={
+    val df=spark.read.format("csv").
+      option("sep","\u0001").
+      option("header","false").
       load(path)
     df
   }
@@ -312,6 +321,85 @@ def univVigActiv (df : DataFrame, df2 : DataFrame): DataFrame={
     val kpiClientesActivos = df.where(col("ID_ACTIVO") ==="1")
     kpiClientesActivos
   }
+
+
+  /****6.-# de clientes con el dato "correo electrónico" nulo/ total de clientes activos***/
+  /******K.BMX.PE.00006.O.002*******/
+    def KPI00602CorreoNuloVig(df:DataFrame): DataFrame={
+      val kpi602 = df.where(col("peparme1").isNull ||
+      col("peparme2").isNull)
+      kpi602
+    }
+
+  def EvidenciaCorreos (df :DataFrame):DataFrame ={
+    val evi = df.select("penumper","peparme1","peparme2")
+    evi
+  }
+
+  /****7.-# de clientes con el dato "correo electrónico" con formato incorrecto/ total de clientes activos***/
+  /****K.BMX.PE.00006.O.003*****/
+
+  def KPI00603PruebaNum(df:DataFrame):DataFrame = {
+    /*val pruebaNum = df.select(
+      col("penumper"),
+      col("peparme1"),
+      col("peparme2"),
+      substring_index(col("peparme2"),".",1).alias("prueba1"),
+      substring_index(col("peparme2"),".",2).alias("prueba2"),
+      substring_index(col("peparme2"),".",3).alias("prueba3"),
+      substring_index(col("peparme2"),".",4).alias("prueba4")
+    )*/
+
+    val pruebaNum = df
+      .withColumn("Prueba1", split(col("peparme2"),"\\."))
+      .select(
+        col("penumper"),
+        col("peparme1"),
+        col("peparme2"),
+        col("Prueba1").getItem(0).as("Prueba1"),
+              col("Prueba1").getItem(1).as("Prueba2"),
+              col("Prueba1").getItem(2).as("Prueba3"),
+              col("Prueba1").getItem(3).as("Prueba4")
+
+      )
+    pruebaNum
+  }
+
+  def KPI00603Dominios(df:DataFrame): DataFrame={
+    val domain = df.withColumn("DOMINIO",regexp_replace(col("DOMINIO"),"\\.+",""))
+    val ODomain = domain.select(col("DOMINIO").as("prueba1_dom"), col("DOMINIO").as("prueba2_dom"), col("DOMINIO").as("prueba3_dom"), col("DOMINIO").as("prueba4_dom"))
+    ODomain
+  }
+
+  def KPI00603CorreoFormatIncorrectVig(df_pruebaNum:DataFrame,df_dominios:DataFrame):DataFrame={
+    val DFMatchDomain = df_pruebaNum.join(
+      df_dominios,
+        trim(lower(df_pruebaNum.col("prueba2"))) === trim(lower(df_dominios.col("prueba2_dom")))
+          /*&&
+          trim(lower(df_pruebaNum.col("prueba3"))) === trim(lower(df_dominios.col("prueba3_dom"))) &&
+            trim(lower(df_pruebaNum.col("prueba4"))) === trim(lower(df_dominios.col("prueba4_dom")))*/
+      ,"left"
+    ).where(col("prueba2_dom").isNull)
+    DFMatchDomain
+  }
+
+
+  /*****clientes con correo repetido******/
+  /****K.BMX.PE.00006.O.004****/
+
+    def KPI00605Query64 (df : DataFrame): DataFrame = {
+      val query64 = df.groupBy(col("penumper"),concat(col("peparme1"),col("peparme2")))
+        .agg(count( col("penumper"))).withColumnRenamed("count(penumper)","Contador")
+        .where(
+          col("Contador") === col("Contador")
+        )
+
+      val queryR = query64.where(col("Contador") >= 2)
+
+      query64
+    }
+
+
 
 
 
